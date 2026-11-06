@@ -33,18 +33,30 @@ public:
 
         mpz_init(gmp_r);
 
-
-
     }
 
-    int calculateGrade() {
+    void Parameter() {
 
-        int grade = t - 1;
+        std::cout << "For this round, use the following parameters: \n"
+            << S << " \n"
+            << n << " \n"
+            << t << " \n"
+            << p << " \n"
+            << std::endl;
+    }
+
+    double calculateGrade() {
+
+        double grade = t - 1;
+
+        std::cout << "Your polynom is a " << grade << " second degree." << std::endl;
 
         return grade;
     }
 
     void calculatePolynom() {
+
+        std::cout << std::endl;
 
         std::random_device rd;
         std::mt19937 generator(rd());
@@ -61,6 +73,14 @@ public:
             arr[i] = dist(generator);
         }
 
+        for (int g = 0; g < arr.size(); g++) {
+
+            std::cout << "Your coefficients are " << arr[g] << std::endl;
+
+        }
+
+        std::cout << std::endl;
+
         // vector for the polynom: S + a1x + a2x^2, ...
         std::vector<mpz_class>polynom = { S };
 
@@ -70,7 +90,6 @@ public:
                 polynom.push_back(arr[j]);
 
             }
-
 
             std::vector<mpz_class> result;
 
@@ -99,7 +118,7 @@ public:
 
             for(int r = 0; r < result.size(); r++){
 
-                std::cout << result[r] << std::endl;
+                std::cout << "P(" << (r + 1) << ", " << result[r] << ")" << std::endl;
             }
        }
 
@@ -118,7 +137,8 @@ int main()
 {
     Encrypt ec;
 
-
+    ec.Parameter();
+    ec.calculatePolynom();
 
 
     return 0;
