@@ -6,48 +6,41 @@
 #include <vector>
 #include <gmp.h>
 #include <random>
-#include <utility>
 #include <gmpxx.h>
 
-int S = 7;
+
+mpz_class S = 7;
 int n = 5;
 int t = 3;
-int p = 19;
 
 int calcGrade = 0;
 
 class Encrypt {
 private:
-
-    mpz_t gmp_S, gmp_n, gmp_t, gmp_p, gmp_r, gmp_calcGrade;
+    mpz_class p;
 
 public:
 
+    // AI-Generated - 2^255 - 19
     Encrypt() {
-
-        mpz_init_set_ui(gmp_S, S);
-        mpz_init_set_ui(gmp_n, n);
-        mpz_init_set_ui(gmp_t, t);
-        mpz_init_set_ui(gmp_p, p);
-        mpz_init_set_ui(gmp_calcGrade, calcGrade);
-
-        mpz_init(gmp_r);
-
+        p = 1;
+        p <<= 255;
+        p -= 19;
     }
 
     void Parameter() {
 
-        std::cout << "For this round, use the following parameters: \n"
-            << S << " \n"
-            << n << " \n"
-            << t << " \n"
-            << p << " \n"
+        std::cout << "For this round, use the following parameters:\n"
+            << "S = " << S << "\n"
+            << "n = " << n << "\n"
+            << "t = " << t << "\n"
+            << "p = " << p << "\n"
             << std::endl;
     }
 
-    double calculateGrade() {
+    int calculateGrade() {
 
-        double grade = t - 1;
+        int grade = t - 1;
 
         std::cout << "Your polynom is a " << grade << " second degree." << std::endl;
 
@@ -59,18 +52,19 @@ public:
         std::cout << std::endl;
 
         std::random_device rd;
-        std::mt19937 generator(rd());
-        std::uniform_int_distribution<int> dist(1, 10);
 
-        double grade = calculateGrade();
+        gmp_randclass generator(gmp_randinit_mt);
+        generator.seed(rd());
+
+        int grade = calculateGrade();
 
         // 'grade' specifies the size of the array 
         // whose coefficients are calculated randomly
-        std::vector<int> arr(grade);
+        std::vector<mpz_class> arr(grade);
 
         for(int i = 0; i < arr.size(); i++) {
 
-            arr[i] = dist(generator);
+            arr[i] = generator.get_z_range(p);
         }
 
         for (int g = 0; g < arr.size(); g++) {
@@ -96,24 +90,21 @@ public:
 
             for (int x = 1; x <= n; x++) {
 
-                double tmp;
+                mpz_class tmp;
                 mpz_class rslt= 0;
-                double xPow = 0;
            
                 for (int i = 0; i < polynom.size(); i++) {
 
-                    tmp = std::pow(x, xPow);
+                    mpz_class X = x;
+
+                    mpz_pow_ui(tmp.get_mpz_t(), X.get_mpz_t(), i);
 
                     rslt += polynom[i] * tmp;
-
-
-                    xPow += 1;
 
                 }
 
                 result.push_back(rslt % p);
 
-                xPow = 0;
             }
 
             for(int r = 0; r < result.size(); r++){
@@ -121,16 +112,6 @@ public:
                 std::cout << "P(" << (r + 1) << ", " << result[r] << ")" << std::endl;
             }
        }
-
-
-
-    ~Encrypt() {
-
-        mpz_clear(gmp_S);
-        mpz_clear(gmp_n);
-        mpz_clear(gmp_t);
-        mpz_clear(gmp_r);
-    }
 };
 
 int main()
