@@ -14,6 +14,9 @@ int n = 5;
 int t = 3;
 
 int calcGrade = 0;
+std::vector<mpz_class> result;
+
+
 
 class Encrypt {
 private:
@@ -21,7 +24,7 @@ private:
 
 public:
 
-    // AI-Generated - 2^255 - 19
+    // AI-Generated P = 2^255 - 19
     Encrypt() {
         p = 1;
         p <<= 255;
@@ -40,11 +43,11 @@ public:
 
     int calculateGrade() {
 
-        int grade = t - 1;
+        calcGrade = t - 1;
 
-        std::cout << "Your polynom is a " << grade << " second degree." << std::endl;
+        std::cout << "Your polynom is a " << calcGrade << " second degree." << std::endl;
 
-        return grade;
+        return calcGrade;
     }
 
     void calculatePolynom() {
@@ -62,7 +65,7 @@ public:
         // whose coefficients are calculated randomly
         std::vector<mpz_class> arr(grade);
 
-        for(int i = 0; i < arr.size(); i++) {
+        for (int i = 0; i < arr.size(); i++) {
 
             arr[i] = generator.get_z_range(p);
         }
@@ -79,48 +82,127 @@ public:
         std::vector<mpz_class>polynom = { S };
 
 
-            for (int j = 0; j < arr.size(); j++) {
+        for (int j = 0; j < arr.size(); j++) {
 
-                polynom.push_back(arr[j]);
+            polynom.push_back(arr[j]);
+
+        }
+
+
+        for (int x = 1; x <= n; x++) {
+
+            mpz_class tmp;
+            mpz_class rslt = 0;
+
+            for (int i = 0; i < polynom.size(); i++) {
+
+                mpz_class X = x;
+
+                mpz_pow_ui(tmp.get_mpz_t(), X.get_mpz_t(), i);
+
+                rslt += polynom[i] * tmp;
 
             }
 
-            std::vector<mpz_class> result;
+            result.push_back(rslt % p);
+
+        }
+
+        for (int r = 0; r < result.size(); r++) {
+
+            std::cout << "P(" << (r + 1) << ", " << result[r] << ")" << std::endl;
+        }
+    }
+};
+
+class Decrypt {
+private:
+
+    mpz_class p;
+    std::vector<mpz_class> chosenPoints;
+
+public:
+
+    Decrypt() {
+
+        p = 1;
+        p <<= 255;
+        p -= 19;
+
+    }
+    void getPoints() {
+
+       
+        for (int i = 0; i < calcGrade + 1; i++) {
+
+            chosenPoints.push_back(result[i]);
+        }
 
 
-            for (int x = 1; x <= n; x++) {
+        std::cout << "\nPoints for reconstruction:" << std::endl;
 
-                mpz_class tmp;
-                mpz_class rslt= 0;
-           
-                for (int i = 0; i < polynom.size(); i++) {
 
-                    mpz_class X = x;
+        for (int r = 0; r < chosenPoints.size(); r++) {
 
-                    mpz_pow_ui(tmp.get_mpz_t(), X.get_mpz_t(), i);
+            std::cout << "P(" << (r + 1) << ", " << chosenPoints[r] << ")" << std::endl;
+        }
+    }
 
-                    rslt += polynom[i] * tmp;
 
+    void calculateLagrange() {
+
+        mpz_class secret = 0;
+
+
+        for (int i = 0; i < chosenPoints.size(); i++) {
+
+            mpz_class zaehler = 1;
+            mpz_class nenner = 1;
+            mpz_class xi = i + 1; 
+            
+
+            for (int j = 0; j < chosenPoints.size(); j++) {
+
+                if (i != j) {
+
+                    mpz_class xj = j + 1;
+
+                    zaehler *= (0 - xj);
+                    nenner *= (xi - xj);
                 }
-
-                result.push_back(rslt % p);
-
             }
-
-            for(int r = 0; r < result.size(); r++){
-
-                std::cout << "P(" << (r + 1) << ", " << result[r] << ")" << std::endl;
+            
+             // AI Generated
+            nenner %= p;
+            if (nenner < 0) {
+                nenner += p;
             }
-       }
+            
+            // AI Generated
+            mpz_class invNenner;
+            mpz_invert(invNenner.get_mpz_t(), nenner.get_mpz_t(), p.get_mpz_t());
+
+            // AI Generated
+            mpz_class tmp = chosenPoints[i] * zaehler * invNenner;
+            secret += tmp;
+            secret %= p;
+        }
+       
+
+        std::cout << "\nReconstructed Secret S = " << secret << std::endl;
+    }
 };
 
 int main()
 {
     Encrypt ec;
+    Decrypt dc;
 
     ec.Parameter();
     ec.calculatePolynom();
 
+    dc.getPoints();
+    dc.calculateLagrange();
 
     return 0;
 }
