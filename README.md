@@ -59,7 +59,7 @@ Reconstructed Secret S = 7
 ```
 
 ## Contributing
-Contributions are welcome! (Please follow the existing code style and email me at david_wahab@icloud.com for permission.)
+Contributions are welcome! (Please follow the existing code style)
 If you have any suggestions or improvements, please feel free to submit a pull request.
 
 ## Acknowledgments
